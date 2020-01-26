@@ -20,10 +20,10 @@ fsm_dict = {
 }
 
 test_case = fsm_testcase.testcase_gen(fsm_dict)
-roads +
+roads_nodes = []
 print('List of events: ', test_case)
 
-scenario_creator = scenario_creator.create_scenario_file(test_case, 't_intersection',)
+scenario_creator = scenario_creator.create_scenario_file(test_case, 't_intersection', roads_nodes)
 # no_of_vehicles = 0
 # no_of_static_objects = 0
 # # no. of events
