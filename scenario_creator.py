@@ -38,6 +38,18 @@ def create_scenario_file(testcase, name, road_nodes):
     # Detect static object, change lane, and come back to original lane
     
     if ai.state[pos].range() == 
+    for _ in range(240):
+    scenario.update()
+    time.sleep(0.1)
+    ai_vehicle.update_vehicle()
+    if int(vehicle.state['pos'][0]) in range(int(ai_vehicle.state['pos'][0]), int(ai_vehicle.state['pos'][0]) + 10):
+        print('Good!sfgshjkssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss')
+        # ai_vehicle.state[0] = -700
+        ai_vehicle.ai_set_mode('stopping')
+        log.debug('Super!')
+    else:
+        log.debug('Expected to move')
+        ai_vehicle.ai_set_mode('span')
     
     
     # Detect car and stop
