@@ -3,7 +3,7 @@ from nltk.corpus import wordnet
 from nltk import word_tokenize
 import nltk
 
-def testcase_gen(states_events_lst, fsm):
+def test_case_gen(states_events_lst, fsm):
     """ Generates all possible test cases for a given Finite State Machine (FSM) """
     lst_events = []
     i = 0
@@ -33,7 +33,7 @@ def testcase_gen(states_events_lst, fsm):
 
     return lst_transitions
 
-def t_interesction_w_obj():
+def t_intersection_w_obj():
     states_events_lst = [
         {'name': 'obstacle_noticed', 'src': 'moving', 'dst': 'moving'},
         {'name': 'car_noticed', 'src': 'moving', 'dst': 'stopped'},
@@ -48,9 +48,9 @@ def t_interesction_w_obj():
         'events': states_events_lst
     })
 
-    return testcase_gen(states_events_lst, fsm)
+    return test_case_gen(states_events_lst, fsm)
 
-def t4w_interesction_wo_obj():
+def t4wcds_intersection_wo_obj():
     states_events_lst = [
         {'name': 'car_noticed', 'src': 'moving', 'dst': 'stopped'},
         {'name': 'car_passed', 'src': 'stopped', 'dst': 'moving'},
@@ -64,9 +64,9 @@ def t4w_interesction_wo_obj():
         'events': states_events_lst
     })
 
-    return testcase_gen(states_events_lst, fsm)
+    return test_case_gen(states_events_lst, fsm)
 
-def t_interesction_w_speed():
+def t_intersection_w_speed():
     states_events_lst = [
         {'name': 'car_noticed', 'src': 'moving_40', 'dst': 'stopped'},
         {'name': 'car_passed', 'src': 'stopped', 'dst': 'moving_40'},
@@ -80,7 +80,7 @@ def t_interesction_w_speed():
         'events': states_events_lst
     })
 
-    return testcase_gen(states_events_lst, fsm)
+    return test_case_gen(states_events_lst, fsm)
 
 def car_following():
     states_events_lst = [
@@ -94,9 +94,9 @@ def car_following():
         'events': states_events_lst
     })
 
-    return testcase_gen(states_events_lst, fsm)
+    return test_case_gen(states_events_lst, fsm)
 
-def fourway_interesction_w_obj():
+def fourway_intersection_w_obj():
     states_events_lst = [
         {'name': 'obstacle_noticed', 'src': 'moving', 'dst': 'lane_changed'},
     ]
@@ -107,11 +107,26 @@ def fourway_interesction_w_obj():
         'events': states_events_lst
     })
 
-    return testcase_gen(states_events_lst, fsm)
+    return test_case_gen(states_events_lst, fsm)
 
-print('[Scenario 1] T-Intersection with a Static Object: %s' % t_interesction_w_obj())
-print('[Scenario 2] T-Intersection without a Static Object: %s' % t4w_interesction_wo_obj())
-print('[Scenario 3] T-Intersection without a Static Object: %s' % t_interesction_w_speed())
+def cul_de_sac_w_parked_car():
+    states_events_lst = [
+        {'name': 'car_noticed', 'src': 'moving', 'dst': 'lane_changed'},
+    ]
+
+    fsm = Fysom({
+        'initial': 'moving',
+        'final': 'lane_changed',
+        'events': states_events_lst
+    })
+
+    return test_case_gen(states_events_lst, fsm)
+
+print('[Scenario 1] T-Intersection with a Static Object: %s' % t_intersection_w_obj())
+print('[Scenario 2] T-Intersection without a Static Object: %s' % t4wcds_intersection_wo_obj())
+print('[Scenario 3] T-Intersection without a Static Object: %s' % t_intersection_w_speed())
 print('[Scenario 4] Car Following: %s' % car_following())
-print('[Scenario 5] Lane Changing: %s' % fourway_interesction_w_obj())
-print('[Scenario 6] Fourway Intersection without a Static Object: %s' % t4w_interesction_wo_obj())
+print('[Scenario 5] Lane Changing: %s' % fourway_intersection_w_obj())
+print('[Scenario 6] Fourway Intersection without a Static Object: %s' % t4wcds_intersection_wo_obj())
+print('[Scenario 7] Cul-de-sac with a moving car: %s' % t4wcds_intersection_wo_obj())
+print('[Scenario 8] Cul-de-sac with a parked car: %s' % cul_de_sac_w_parked_car())
