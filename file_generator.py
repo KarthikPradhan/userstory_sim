@@ -22,7 +22,7 @@ def ai_stopped():
     """" Checks if the AI is at a standstill """
     pass
 
-def ai_moving():
+def ai_moving(speed=False):
     """" Checks if the AI is moving """
     pass
 
