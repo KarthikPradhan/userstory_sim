@@ -84,8 +84,8 @@ def t_intersection_w_speed():
 
 def car_following():
     states_events_lst = [
-        {'name': 'car_noticed', 'src': 'moving', 'dst': 'decelerating'},
-        {'name': 'car_stopped', 'src': 'decelerating', 'dst': 'stopped'}
+        {'name': 'car_noticed', 'src': 'moving', 'dst': 'following'},
+        {'name': 'car_stopped', 'src': 'following', 'dst': 'stopped'}
     ]
 
     fsm = Fysom({
@@ -122,11 +122,26 @@ def cul_de_sac_w_parked_car():
 
     return test_case_gen(states_events_lst, fsm)
 
+def sudden_obstruction():
+    states_events_lst = [
+        {'name': 'car_noticed', 'src': 'moving', 'dst': 'stopped'},
+    ]
+
+    fsm = Fysom({
+        'initial': 'moving',
+        'final': 'stopped',
+        'events': states_events_lst
+    })
+
+    return test_case_gen(states_events_lst, fsm)
+
 print('[Scenario 1] T-Intersection with a Static Object: %s' % t_intersection_w_obj())
 print('[Scenario 2] T-Intersection without a Static Object: %s' % t4wcds_intersection_wo_obj())
 print('[Scenario 3] T-Intersection without a Static Object: %s' % t_intersection_w_speed())
-print('[Scenario 4] Car Following: %s' % car_following())
+print('[Scenario 4] Straight Road - Car Following: %s' % car_following())
 print('[Scenario 5] Lane Changing: %s' % fourway_intersection_w_obj())
 print('[Scenario 6] Fourway Intersection without a Static Object: %s' % t4wcds_intersection_wo_obj())
 print('[Scenario 7] Cul-de-sac with a moving car: %s' % t4wcds_intersection_wo_obj())
 print('[Scenario 8] Cul-de-sac with a parked car: %s' % cul_de_sac_w_parked_car())
+print('[Scenario 9] T-Intersection - Car Following: %s' % car_following())
+print('[Scenario 10] Straight Road - Sudden Obstruction: %s' % sudden_obstruction())
