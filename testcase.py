@@ -2,6 +2,7 @@ from fysom import *
 from nltk.corpus import wordnet
 from nltk import word_tokenize
 import nltk
+from file_generator import create_file
 
 def test_case_gen(states_events_lst, fsm):
     """ Generates all possible test cases for a given Finite State Machine (FSM) """
@@ -135,13 +136,25 @@ def sudden_obstruction():
 
     return test_case_gen(states_events_lst, fsm)
 
-print('[Scenario 1] T-Intersection with a Static Object: %s' % t_intersection_w_obj())
-print('[Scenario 2] T-Intersection without a Static Object: %s' % t4wcds_intersection_wo_obj())
-print('[Scenario 3] T-Intersection without a Static Object: %s' % t_intersection_w_speed())
-print('[Scenario 4] Straight Road - Car Following: %s' % car_following())
-print('[Scenario 5] Lane Changing: %s' % fourway_intersection_w_obj())
-print('[Scenario 6] Fourway Intersection without a Static Object: %s' % t4wcds_intersection_wo_obj())
-print('[Scenario 7] Cul-de-sac with a moving car: %s' % t4wcds_intersection_wo_obj())
-print('[Scenario 8] Cul-de-sac with a parked car: %s' % cul_de_sac_w_parked_car())
-print('[Scenario 9] T-Intersection - Car Following: %s' % car_following())
-print('[Scenario 10] Straight Road - Sudden Obstruction: %s' % sudden_obstruction())
+# Uncomment the following code to print the test cases
+# print('[Scenario 1] T-Intersection with a Static Object: %s' % t_intersection_w_obj())
+# print('[Scenario 2] T-Intersection without a Static Object: %s' % t4wcds_intersection_wo_obj())
+# print('[Scenario 3] T-Intersection without a Static Object: %s' % t_intersection_w_speed())
+# print('[Scenario 4] Straight Road - Car Following: %s' % car_following())
+# print('[Scenario 5] Lane Changing: %s' % fourway_intersection_w_obj())
+# print('[Scenario 6] Fourway Intersection without a Static Object: %s' % t4wcds_intersection_wo_obj())
+# print('[Scenario 7] Cul-de-sac with a moving car: %s' % t4wcds_intersection_wo_obj())
+# print('[Scenario 8] Cul-de-sac with a parked car: %s' % cul_de_sac_w_parked_car())
+# print('[Scenario 9] T-Intersection - Car Following: %s' % car_following())
+# print('[Scenario 10] Straight Road - Sudden Obstruction: %s' % sudden_obstruction())
+
+create_file('t_intersection_w_obj', t_intersection_w_obj())
+create_file('t_intersection_wo_obj', t4wcds_intersection_wo_obj())
+create_file('t_intersection_w_speed', t_intersection_w_speed())
+create_file('straight_car_following', car_following())
+create_file('fourway_intersection_w_obj', fourway_intersection_w_obj())
+create_file('fw_intersection_wo_obj', t4wcds_intersection_wo_obj())
+create_file('cds_wo_obj', t4wcds_intersection_wo_obj())
+create_file('cul_de_sac_w_parked_car', cul_de_sac_w_parked_car())
+create_file('t_intersection_car_following', car_following())
+create_file('sudden_obstruction', sudden_obstruction())
