@@ -116,13 +116,11 @@ def environment_setup(test_case):
     return {'file_content': create_objs(no_of_objs) + create_cars(no_of_cars), 'no_of_cars': no_of_cars}
 
 def detect_obstacle(obj):
-    """ Checks whether the self-driving car is able to notice the given obstacle based on the distance.
-A check is performed if the distance between the self-driving car and the obstacle is within 30 metres."""
+    """ Checks whether the self-driving car is able to notice the given obstacle. """
     pass
 
 def detect_car(car):
-    """ Checks whether the self-driving car is able to notice the given car based on the distance.
-A check is performed if the distance between the self-driving car and the given car is within 30 metres. """
+    """ Checks whether the self-driving car is able to notice the given car. """
     pass
 
 
@@ -142,20 +140,20 @@ def ai_moving(speed=False):
 
 
 def ai_following(car):
-    """ Checks whether the self-driving car is following the given car.
-A check is performed if the distance between the self-driving car and the obstacle is within 30 metres."""
+    """ Checks whether the self-driving car is able to follow the given car. """
     pass
 
-def get_similar_func(event):
+def get_similar_func_content(event):
     """ Returns the function whose description is most similar to the given event. """
     pos_tagged_e_tup = nltk.pos_tag(event)
-    subject = 'Self-driving car'
-    [tup[0] for tup in pos_tagged_e_tup if tup[1] == "NN"][0]
-    [tup[0] for tup in pos_tagged_e_tup if tup[1] == "NN"][0]
-
-    # pos_tagged_e = dict((pos, e) for e, pos in pos_tagged_e.items())
-    # event = pos_tagged_e.get('VBD') + ' ' + pos_tagged_e.get('NN')
-
+    subj = 'Self-driving car'
+    dir_obj = [tup[0] for tup in pos_tagged_e_tup if tup[1] == "NN"][0]
+    verb = [tup[0] for tup in pos_tagged_e_tup if tup[1] == "VBD"][0]
+    indir_obj_lst = [tup[0] for tup in pos_tagged_e_tup if tup[1] == "CD"]
+    indir_obj = ' at ' + indir_obj_lst[0]  + 'kmph' if indir_obj_lst else ''
+    # 'at' is added because the direct object is always speed in all our scenarios
+    # However, this can be improved in the future work to work for other measures, for example, distance, wind speed, etc if the simulator supports
+    event = subj + ' ' + verb + ' ' + dir_obj + indir_obj
     dict_fn_sim = {}
     dict_fn_sim.update({'detect_obstacle': nltk.jaccard_distance(set(event), set(detect_obstacle.__doc__.strip()))})
     dict_fn_sim.update({'detect_car': nltk.jaccard_distance(set(event), set(detect_car.__doc__.strip()))})
@@ -163,24 +161,19 @@ def get_similar_func(event):
     dict_fn_sim.update({'ai_stopped': nltk.jaccard_distance(set(event), set(ai_stopped.__doc__.strip()))})
     dict_fn_sim.update({'ai_moving': nltk.jaccard_distance(set(event), set(ai_moving.__doc__.strip()))})
     dict_fn_sim.update({'ai_following': nltk.jaccard_distance(set(event), set(ai_following.__doc__.strip()))})
-    print(pos_tagged_e, dict_fn_sim)
     return min(dict_fn_sim, key=lambda k: dict_fn_sim[k])
 
 
 def fetch_test_case_content(test_case):
     """ Generates the script to check if the simulation runs as per the test case. """
-    lst_events = [e[1] for e in test_case]
-    # lst_fn_docstrs = [detect_obstacle.__doc__.strip(), detect_car.__doc__.strip(), car_passed.__doc__.strip(),
-    #                  ai_stopped.__doc__.strip(), ai_moving.__doc__.strip(), ai_following.__doc__.strip()]
-
-    t_intersection_w_obj = [('moving', 'obstacle_noticed', 'moving'), ('moving', 'car_noticed', 'stopped'),
-                            ('stopped', 'car_passed', 'moving'), ('moving', 'car_noticed', 'stopped'),
-                            ('stopped', 'car_passed', 'moving')]
+    # t_intersection_w_obj = [('moving', 'obstacle_noticed', 'moving'), ('moving', 'car_noticed', 'stopped'),
+    #                         ('stopped', 'car_passed', 'moving'), ('moving', 'car_noticed', 'stopped'),
+    #                         ('stopped', 'car_passed', 'moving')]
 
     i = 0
-    while i < len(t_intersection_w_obj):
+    while i < len(test_case):
         # nltk.jaccard_distance(set(' '.join(t_intersection_w_obj[i][1].split('_'))), set(detect_static_object.__doc__.strip()))
-        print('Which function? ', ' '.join(t_intersection_w_obj[i][1].split('_')), ': ', get_similar_func(t_intersection_w_obj[i][1].split('_')))
+        print('Which function? ', ' '.join(test_case[i][1].split('_')), ': ', get_similar_func_content(test_case[i][1].split('_')))
         i += 1
 
     # print(detect_static_object.__doc__.strip())
