@@ -115,32 +115,43 @@ def environment_setup(test_case):
 
     return {'file_content': create_objs(no_of_objs) + create_cars(no_of_cars), 'no_of_cars': no_of_cars}
 
-def detect_obstacle(obj):
+def detect_obstacle(*args):
     """ Checks whether the self-driving car is able to notice the given obstacle. """
+    print(args)
+    # Expects obstacle as a parameter
     pass
 
-def detect_car(car):
+def detect_car(*args):
     """ Checks whether the self-driving car is able to notice the given car. """
+    print(args)
+    # Expects car as a parameter
     pass
 
 
-def ai_stopped():
+def ai_stopped(*args):
     """ Checks whether the self-driving car came to a halt. """
+    print(args)
     pass
 
 
-def car_passed(car):
+def car_passed(*args):
     """ Checks whether the given car passed the self-driving car. """
+    print(args)
+    # Expects car as a parameter
     pass
 
 
-def ai_moving(speed=False):
+def ai_moving(*args):
     """ Checks whether the self-driving car is moving at a given speed """
+    print(args)
+    # Expects speed as the parameter, by default it is set to False
     pass
 
 
-def ai_following(car):
+def ai_following(*args):
     """ Checks whether the self-driving car is able to follow the given car. """
+    print(args)
+    # Expects car as a parameter
     pass
 
 def get_similar_func_content(event):
@@ -155,35 +166,33 @@ def get_similar_func_content(event):
     # However, this can be improved in the future work to work for other measures, for example, distance, wind speed, etc if the simulator supports
     event = subj + ' ' + verb + ' ' + dir_obj + indir_obj
     dict_fn_sim = {}
-    dict_fn_sim.update({'detect_obstacle': nltk.jaccard_distance(set(event), set(detect_obstacle.__doc__.strip()))})
-    dict_fn_sim.update({'detect_car': nltk.jaccard_distance(set(event), set(detect_car.__doc__.strip()))})
-    dict_fn_sim.update({'car_passed': nltk.jaccard_distance(set(event), set(car_passed.__doc__.strip()))})
-    dict_fn_sim.update({'ai_stopped': nltk.jaccard_distance(set(event), set(ai_stopped.__doc__.strip()))})
-    dict_fn_sim.update({'ai_moving': nltk.jaccard_distance(set(event), set(ai_moving.__doc__.strip()))})
-    dict_fn_sim.update({'ai_following': nltk.jaccard_distance(set(event), set(ai_following.__doc__.strip()))})
+    try:
+        dict_fn_sim.update({'detect_obstacle': nltk.jaccard_distance(set(event), set(detect_obstacle.__doc__.strip()))})
+        dict_fn_sim.update({'detect_car': nltk.jaccard_distance(set(event), set(detect_car.__doc__.strip()))})
+        dict_fn_sim.update({'car_passed': nltk.jaccard_distance(set(event), set(car_passed.__doc__.strip()))})
+        dict_fn_sim.update({'ai_stopped': nltk.jaccard_distance(set(event), set(ai_stopped.__doc__.strip()))})
+        dict_fn_sim.update({'ai_moving': nltk.jaccard_distance(set(event), set(ai_moving.__doc__.strip()))})
+        dict_fn_sim.update({'ai_following': nltk.jaccard_distance(set(event), set(ai_following.__doc__.strip()))})
+    except AttributeError:
+        print('Please add docstrings to one of the event-matching functions.')
+        return ''
+
     return min(dict_fn_sim, key=lambda k: dict_fn_sim[k])
 
 
 def fetch_test_case_content(test_case):
     """ Generates the script to check if the simulation runs as per the test case. """
-    # t_intersection_w_obj = [('moving', 'obstacle_noticed', 'moving'), ('moving', 'car_noticed', 'stopped'),
-    #                         ('stopped', 'car_passed', 'moving'), ('moving', 'car_noticed', 'stopped'),
-    #                         ('stopped', 'car_passed', 'moving')]
-
+    t_intersection_w_obj = [('moving', 'obstacle_noticed', 'moving'), ('moving', 'car_noticed', 'stopped'),
+                            ('stopped', 'car_passed', 'moving'), ('moving', 'car_noticed', 'stopped'),
+                            ('stopped', 'car_passed', 'moving')]
     i = 0
     while i < len(test_case):
-        # nltk.jaccard_distance(set(' '.join(t_intersection_w_obj[i][1].split('_'))), set(detect_static_object.__doc__.strip()))
-        print('Which function? ', ' '.join(test_case[i][1].split('_')), ': ', get_similar_func_content(test_case[i][1].split('_')))
+        matched_func = get_similar_func_content(test_case[i][1].split('_'))
+        # print('Which function? ', ' '.join(test_case[i][1].split('_')), ': ', matched_func)
+        param = test_case[i][1].split('_')[0]
+        eval(matched_func + "('" + param + "', '" + str(i) + "')")
         i += 1
 
-    # print(detect_static_object.__doc__.strip())
-    # print(detect_car.__doc__.strip())
-    # print(ai_stopped.__doc__.strip())
-    # print(ai_moving.__doc__.strip())
-    # print(ai_following.__doc__.strip())
-
-    # print(' '.join(t_intersection_w_obj[0][1].split('_')))
-    # print(nltk.jaccard_distance(set(' '.join(t_intersection_w_obj[0][1].split('_'))), set(detect_static_object.__doc__.strip())))
     return """"""
 
 
@@ -198,3 +207,10 @@ create_file('t_intersection_w_obj', t_intersection_w_obj)
 # create_file('cul_de_sac_w_parked_car', cul_de_sac_w_parked_car)
 # create_file('t_intersection_car_following', t_intersection_car_following)
 # create_file('sudden_obstruction', sudden_obstruction)
+
+
+# print(detect_static_object.__doc__.strip())
+# print(detect_car.__doc__.strip())
+# print(ai_stopped.__doc__.strip())
+# print(ai_moving.__doc__.strip())
+# print(ai_following.__doc__.strip())
