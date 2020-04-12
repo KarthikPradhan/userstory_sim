@@ -1,7 +1,4 @@
 from fysom import *
-from nltk.corpus import wordnet
-from nltk import word_tokenize
-import nltk
 from file_generator import create_file
 
 def test_case_gen(states_events_lst, fsm):

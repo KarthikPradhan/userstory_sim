@@ -119,40 +119,41 @@ def detect_obstacle(*args):
     """ Checks whether the self-driving car is able to notice the given obstacle. """
     print(args)
     # Expects obstacle as a parameter
-    pass
+    return """"""
 
 def detect_car(*args):
     """ Checks whether the self-driving car is able to notice the given car. """
     print(args)
     # Expects car as a parameter
-    pass
+    return """"""
 
 
 def ai_stopped(*args):
     """ Checks whether the self-driving car came to a halt. """
     print(args)
-    pass
+    return """"""
 
 
 def car_passed(*args):
     """ Checks whether the given car passed the self-driving car. """
     print(args)
     # Expects car as a parameter
-    pass
+    return """"""
 
 
 def ai_moving(*args):
     """ Checks whether the self-driving car is moving at a given speed """
     print(args)
     # Expects speed as the parameter, by default it is set to False
-    pass
+    return """"""
 
 
 def ai_following(*args):
     """ Checks whether the self-driving car is able to follow the given car. """
     print(args)
     # Expects car as a parameter
-    pass
+    return """"""
+
 
 def get_similar_func_content(event):
     """ Returns the function whose description is most similar to the given event. """
@@ -182,18 +183,20 @@ def get_similar_func_content(event):
 
 def fetch_test_case_content(test_case):
     """ Generates the script to check if the simulation runs as per the test case. """
-    t_intersection_w_obj = [('moving', 'obstacle_noticed', 'moving'), ('moving', 'car_noticed', 'stopped'),
-                            ('stopped', 'car_passed', 'moving'), ('moving', 'car_noticed', 'stopped'),
-                            ('stopped', 'car_passed', 'moving')]
+    # t_intersection_w_obj = [('moving', 'obstacle_noticed', 'moving'), ('moving', 'car_noticed', 'stopped'),
+    #                         ('stopped', 'car_passed', 'moving'), ('moving', 'car_noticed', 'stopped'),
+    #                         ('stopped', 'car_passed', 'moving')]
+    testing_content = """"""
     i = 0
     while i < len(test_case):
         matched_func = get_similar_func_content(test_case[i][1].split('_'))
         # print('Which function? ', ' '.join(test_case[i][1].split('_')), ': ', matched_func)
         param = test_case[i][1].split('_')[0]
-        eval(matched_func + "('" + param + "', '" + str(i) + "')")
+        param = 'obj' if param == 'obstacle' else param # Just to make it fit the convention used
+        testing_content += eval(matched_func + "('" + param + "', '" + str(i) + "')")
         i += 1
 
-    return """"""
+    return testing_content
 
 
 # Uncomment the below function calls to generate the file content
