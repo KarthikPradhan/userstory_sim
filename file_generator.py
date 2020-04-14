@@ -131,10 +131,13 @@ def environment_setup(test_case):
 def detect_obstacle(*args):
     """ Checks whether the self-driving car is able to notice the given obstacle. """
     print(args)
-    # Expects obstacle as a parameter
+    # Expects obstacle and iteration count as parameters
     return """
     scenario.update()
     dist_{args[0]_args[1]} = np.linalg.norm(np.array(vut.state['pos']) - np.array([2.91697, -12.596, 119.58]))
+    
+    if dist_{args[0]_args[1]} == 0:
+        print('Obstacle Detection Successful')
     """
 
 def detect_car(*args):
@@ -204,12 +207,16 @@ def fetch_test_case_content(test_case):
     #                         ('stopped', 'car_passed', 'moving')]
     testing_content = """"""
     i = 0
+    lst_events_set = []
     while i < len(test_case):
         matched_func = get_similar_func_content(test_case[i][1].split('_'))
         # print('Which function? ', ' '.join(test_case[i][1].split('_')), ': ', matched_func)
-        param = test_case[i][1].split('_')[0]
+        current_event = test_case[i][1]
+        param = current_event.split('_')[0]
         param = 'obj' if param == 'obstacle' else param # Just to make it fit the convention used
-        testing_content += eval(matched_func + "('" + param + "', '" + str(i) + "')")
+        ent_no =  lst_events_set.count(current_event) - 1 if lst_events_set.count(current_event) > 1  else 1
+        testing_content += eval(matched_func + "('" + param + "', '" + str(ent_no) + "')")
+        lst_events_set.append(current_event)
         i += 1
 
     return testing_content
