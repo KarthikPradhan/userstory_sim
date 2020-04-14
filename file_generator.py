@@ -136,7 +136,7 @@ def detect_obstacle(*args):
     scenario.update()
     dist_{args[0]_args[1]} = np.linalg.norm(np.array(vut.state['pos']) - np.array([2.91697, -12.596, 119.58]))
     
-    if dist_{args[0]_args[1]} == 0:
+    if dist_{args[0]_args[1]} < 8:
         print('Obstacle Detection Successful')
     """
 
@@ -144,34 +144,65 @@ def detect_car(*args):
     """ Checks whether the self-driving car is able to notice the given car. """
     print(args)
     # Expects car as a parameter
-    return """"""
+    return """
+    scenario.update()
+    dist_{args[0]_args[1]} = np.linalg.norm(np.array(vut.state['pos']) - np.array(np.array({args[0]_args[1]}.state['pos']))
+    
+    if dist_{args[0]_args[1]} < 8:
+        print('Car Detection Successful')
+    """
 
 
 def ai_stopped(*args):
     """ Checks whether the self-driving car came to a halt. """
     print(args)
-    return """"""
+    return """
+    scenario.update()
+    if sensors['electrics']['values']['wheelspeed'] == 0:
+        print('AI Stopped')
+    """
 
 
 def car_passed(*args):
     """ Checks whether the given car passed the self-driving car. """
     print(args)
     # Expects car as a parameter
-    return """"""
+    return """
+    scenario.update()
+    dist_{args[0]_args[1]}_prev = np.linalg.norm(np.array(vut.state['pos']) - np.array(np.array({args[0]_args[1]}.state['pos']))
+    sleep(0.1)
+    dist_{args[0]_args[1]}_next = np.linalg.norm(np.array(vut.state['pos']) - np.array(np.array({args[0]_args[1]}.state['pos']))
+    
+    if dist_{args[0]_args[1]}_next > dist_{args[0]_args[1]}_prev:
+        print('Car Passing Successful')
+    """
 
 
 def ai_moving(*args):
     """ Checks whether the self-driving car is moving at a given speed """
     print(args)
-    # Expects speed as the parameter, by default it is set to False
-    return """"""
+    # Expects speed as the parameter, by default it is set to 0
+    return """
+    scenario.update()
+    if sensors['electrics']['values']['wheelspeed'] > 0:
+        print('AI is moving')
+        
+    if sensors['electrics']['values']['wheelspeed'] == {args[2]}:
+        print('AI is moving at {args[2]} kmph')
+    """
 
 
 def ai_following(*args):
     """ Checks whether the self-driving car is able to follow the given car. """
     print(args)
     # Expects car as a parameter
-    return """"""
+    return """
+    scenario.update()
+    follow_{args[0]_args[1]} = np.linalg.norm(np.array(vut.state['dir']) - np.array(np.array({args[0]_args[1]}.state['dir']))
+    
+    if follow_{args[0]_args[1]} < 8:
+        print('Car Following Successful')
+    """
 
 
 def get_similar_func_content(event):
@@ -212,10 +243,11 @@ def fetch_test_case_content(test_case):
         matched_func = get_similar_func_content(test_case[i][1].split('_'))
         # print('Which function? ', ' '.join(test_case[i][1].split('_')), ': ', matched_func)
         current_event = test_case[i][1]
+        speed = current_event.split(' ')[2] if len(current_event.split(' ')) == 3 else 0
         param = current_event.split('_')[0]
         param = 'obj' if param == 'obstacle' else param # Just to make it fit the convention used
         ent_no =  lst_events_set.count(current_event) - 1 if lst_events_set.count(current_event) > 1  else 1
-        testing_content += eval(matched_func + "('" + param + "', '" + str(ent_no) + "')")
+        testing_content += eval(matched_func + "('" + param + "', '" + str(ent_no) + "', '" + str(speed) + "')")
         lst_events_set.append(current_event)
         i += 1
 
