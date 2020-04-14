@@ -25,10 +25,17 @@ import spacy
 # #     for t in sy2:
 # #         print("%s\t %s\t :%s" % (s.name,t.name,wordnet.path_similarity(s,t)))
 
-nlp = spacy.load("en_core_web_md")  # make sure to use larger model!
-tokens = nlp("detect notice")
+# nlp = spacy.load("en_core_web_md")  # make sure to use larger model!
+# tokens = nlp("detect notice")
+#
+# for token1 in tokens:
+#     for token2 in tokens:
+#         print(token1.text, token2.text, token1.similarity(token2))
 
-for token1 in tokens:
-    for token2 in tokens:
-        print(token1.text, token2.text, token1.similarity(token2))
+w1 = set('The car detected the obstacle')
+w2 = set('obstacle noticed')
+w3 = set('car noticed')
+
+print('JACCARD DISTANCE obj ', nltk.jaccard_distance(w1, w2))
+print('JACCARD DISTANCE car ', nltk.jaccard_distance(w1, w3))
 

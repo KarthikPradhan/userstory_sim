@@ -1,3 +1,9 @@
+"""
+.. module:: testcase
+    :synopsis: Generates test cases from Finite State Machines (FSM)
+.. moduleauthor:: Karthik Pradhan
+"""
+
 from fysom import *
 from file_generator import create_file
 

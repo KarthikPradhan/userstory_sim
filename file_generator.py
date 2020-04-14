@@ -1,3 +1,9 @@
+"""
+.. module:: file_generator
+    :synopsis: Generates files from test cases which can be executed to run scenarios and test the same
+.. moduleauthor:: Karthik Pradhan
+"""
+
 from nltk.corpus import wordnet as wn
 import nltk
 
@@ -24,12 +30,16 @@ sudden_obstruction = [('moving', 'car_noticed', 'stopped')]
 def create_file(scenario, test_case):
     f = open("scenarios/" + scenario + ".py", "w")
     file_contents = f"""from beamngpy import BeamNGpy, Scenario, Vehicle, StaticObject
+from beamngpy.sensors import Electrics
 import numpy as np
+from time import sleep, time
 
 beamng = BeamNGpy('localhost', 64256, home=r'C:\\Deepak\\beamng-research_unlimited\\trunk' )
 scenario = Scenario('west_coast_usa', '{scenario}')
 
 vut = Vehicle('vut', model='coupe', licence='VUT', colour='Green')
+electrics = Electrics()
+vut.attach_sensor('electrics', electrics)
 scenario.add_vehicle(vut, pos=(-198.5, -164.189, 119.7), rot=(0, 0, -126.25))
 """
     # dict_env = environment_setup(test_case)
@@ -44,16 +54,19 @@ bng.start_scenario()
 
 vut.ai_set_mode('span')
 vut.ai_drive_in_lane(True)
-vut.ai_set_aggression(0.1)
 
 """
 
     # file_contents += define_cars_paths(no_of_cars)
-    file_contents += fetch_test_case_content(test_case)
     file_contents += """
-while True:
-    bng.step(60)
+for _ in range(240):
+    sleep(0.1)
+    vut.update_vehicle()
+    sensors = bng.poll_sensors(vut)
     """
+
+    file_contents += fetch_test_case_content(test_case)
+
     # f.write(file_contents)
     # f.close()
 
@@ -119,7 +132,10 @@ def detect_obstacle(*args):
     """ Checks whether the self-driving car is able to notice the given obstacle. """
     print(args)
     # Expects obstacle as a parameter
-    return """"""
+    return """
+    scenario.update()
+    dist_{args[0]_args[1]} = np.linalg.norm(np.array(vut.state['pos']) - np.array([2.91697, -12.596, 119.58]))
+    """
 
 def detect_car(*args):
     """ Checks whether the self-driving car is able to notice the given car. """
