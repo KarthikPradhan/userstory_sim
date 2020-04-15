@@ -42,9 +42,9 @@ electrics = Electrics()
 vut.attach_sensor('electrics', electrics)
 scenario.add_vehicle(vut, pos=(-198.5, -164.189, 119.7), rot=(0, 0, -126.25))
 """
-    # dict_env = environment_setup(test_case)
-    # file_contents += dict_env.get('file_content')
-    # no_of_cars = dict_env.get('no_of_cars')
+    dict_env = environment_setup(test_case)
+    file_contents += dict_env.get('file_content')
+    no_of_cars = dict_env.get('no_of_cars')
 
     file_contents += """
 scenario.make(beamng)
@@ -57,7 +57,7 @@ vut.ai_drive_in_lane(True)
 
 """
 
-    # file_contents += define_cars_paths(no_of_cars)
+    file_contents += define_cars_paths(no_of_cars)
     file_contents += """
 for _ in range(240):
     sleep(0.1)
@@ -67,8 +67,8 @@ for _ in range(240):
 
     file_contents += fetch_test_case_content(test_case)
 
-    # f.write(file_contents)
-    # f.close()
+    f.write(file_contents)
+    f.close()
 
 
 def create_objs(n):
@@ -110,7 +110,7 @@ def count_cars_objs(car_obj):
     car, obj = wn.synset('car.n.01'), wn.synset('object.n.01')
     car_obj_syn = wn.synset(car_obj + '.n.01')
     car_sim, obj_sim = car.path_similarity(car_obj_syn), obj.path_similarity(car_obj_syn)
-    print('EVENT: ', car_obj, ', CAR SIMILARITY: ', car_sim, ', OBJ SIMILARITY: ', obj_sim)
+    # print('EVENT: ', car_obj, ', CAR SIMILARITY: ', car_sim, ', OBJ SIMILARITY: ', obj_sim)
     return 'car' if car_sim > obj_sim else 'obj'
 
 
@@ -124,42 +124,34 @@ def environment_setup(test_case):
             no_of_objs += 1
 
     no_of_cars /= 2  # Quick hack to avoid unnecessary multiplication of cars by 2
-    print('CAR COUNT: ', no_of_cars, 'OBJ COUNT: ', no_of_objs)
+    # print('CAR COUNT: ', no_of_cars, 'OBJ COUNT: ', no_of_objs)
 
     return {'file_content': create_objs(no_of_objs) + create_cars(no_of_cars), 'no_of_cars': no_of_cars}
 
-def detect_obstacle(*args):
-    """ Checks whether the self-driving car is able to notice the given obstacle. """
-    print(args)
+def get_state_func_content(state):
+    dict_fn_sim = {}
+    try:
+        dict_fn_sim.update({'ai_stopped': nltk.jaccard_distance(set(state), set(ai_stopped.__doc__.strip()))})
+        dict_fn_sim.update({'ai_moving': nltk.jaccard_distance(set(state), set(ai_moving.__doc__.strip()))})
+        dict_fn_sim.update({'ai_following': nltk.jaccard_distance(set(state), set(ai_following.__doc__.strip()))})
+    except AttributeError:
+        print('Please add docstrings to one of the event-matching functions.')
+        return ''
+
+    return min(dict_fn_sim, key=lambda k: dict_fn_sim[k])
+
+def detect_obstacle_car(*args):
+    """ Checks whether the self-driving car is able to notice the given obstacle or car. """
+    print(args, args[0])
+    car_or_obj = "[2.91697, -12.596, 119.58]" if args[0] == 'obj' else "{}_{}.state['pos']".format(args[0], args[1])
     # Expects obstacle and iteration count as parameters
-    return """
+    return f"""
+    # Below code snippet is generated form 'detect_obstacle_car' function
     scenario.update()
-    dist_{args[0]_args[1]} = np.linalg.norm(np.array(vut.state['pos']) - np.array([2.91697, -12.596, 119.58]))
+    dist_{args[0]}_{args[1]} = np.linalg.norm(np.array(vut.state['pos']) - np.array({car_or_obj}))
     
-    if dist_{args[0]_args[1]} < 8:
+    if dist_{args[0]}_{args[1]} < 8:
         print('Obstacle Detection Successful')
-    """
-
-def detect_car(*args):
-    """ Checks whether the self-driving car is able to notice the given car. """
-    print(args)
-    # Expects car as a parameter
-    return """
-    scenario.update()
-    dist_{args[0]_args[1]} = np.linalg.norm(np.array(vut.state['pos']) - np.array(np.array({args[0]_args[1]}.state['pos']))
-    
-    if dist_{args[0]_args[1]} < 8:
-        print('Car Detection Successful')
-    """
-
-
-def ai_stopped(*args):
-    """ Checks whether the self-driving car came to a halt. """
-    print(args)
-    return """
-    scenario.update()
-    if sensors['electrics']['values']['wheelspeed'] == 0:
-        print('AI Stopped')
     """
 
 
@@ -167,14 +159,25 @@ def car_passed(*args):
     """ Checks whether the given car passed the self-driving car. """
     print(args)
     # Expects car as a parameter
-    return """
+    return f"""
+    # Below code snippet is generated form 'car_passed' function
     scenario.update()
-    dist_{args[0]_args[1]}_prev = np.linalg.norm(np.array(vut.state['pos']) - np.array(np.array({args[0]_args[1]}.state['pos']))
+    dist_{args[0]}_{args[1]}_prev = np.linalg.norm(np.array(vut.state['pos']) - np.array(np.array({args[0]}_{args[1]}.state['pos'])))
     sleep(0.1)
-    dist_{args[0]_args[1]}_next = np.linalg.norm(np.array(vut.state['pos']) - np.array(np.array({args[0]_args[1]}.state['pos']))
-    
-    if dist_{args[0]_args[1]}_next > dist_{args[0]_args[1]}_prev:
+    dist_{args[0]}_{args[1]}_next = np.linalg.norm(np.array(vut.state['pos']) - np.array(np.array({args[0]}_{args[1]}.state['pos'])))
+
+    if dist_{args[0]}_{args[1]}_next > dist_{args[0]}_{args[1]}_prev:
         print('Car Passing Successful')
+    """
+
+
+def ai_stopped(*args):
+    """ Checks whether the self-driving car came to a halt. """
+    print(args)
+    return f"""
+    scenario.update()
+    if sensors['electrics']['values']['wheelspeed'] == 0:
+        print('AI Stopped')
     """
 
 
@@ -182,7 +185,7 @@ def ai_moving(*args):
     """ Checks whether the self-driving car is moving at a given speed """
     print(args)
     # Expects speed as the parameter, by default it is set to 0
-    return """
+    return f"""
     scenario.update()
     if sensors['electrics']['values']['wheelspeed'] > 0:
         print('AI is moving')
@@ -196,16 +199,16 @@ def ai_following(*args):
     """ Checks whether the self-driving car is able to follow the given car. """
     print(args)
     # Expects car as a parameter
-    return """
+    return f"""
     scenario.update()
-    follow_{args[0]_args[1]} = np.linalg.norm(np.array(vut.state['dir']) - np.array(np.array({args[0]_args[1]}.state['dir']))
+    follow_{args[0]}_{args[1]} = np.linalg.norm(np.array(vut.state['dir']) - np.array(np.array({args[0]}_{args[1]}.state['dir']))
     
-    if follow_{args[0]_args[1]} < 8:
+    if follow_{args[0]}_{args[1]} < 8:
         print('Car Following Successful')
     """
 
 
-def get_similar_func_content(event):
+def get_event_func_content(event):
     """ Returns the function whose description is most similar to the given event. """
     pos_tagged_e_tup = nltk.pos_tag(event)
     subj = 'Self-driving car'
@@ -218,12 +221,8 @@ def get_similar_func_content(event):
     event = subj + ' ' + verb + ' ' + dir_obj + indir_obj
     dict_fn_sim = {}
     try:
-        dict_fn_sim.update({'detect_obstacle': nltk.jaccard_distance(set(event), set(detect_obstacle.__doc__.strip()))})
-        dict_fn_sim.update({'detect_car': nltk.jaccard_distance(set(event), set(detect_car.__doc__.strip()))})
+        dict_fn_sim.update({'detect_obstacle_car': nltk.jaccard_distance(set(event), set(detect_obstacle_car.__doc__.strip()))})
         dict_fn_sim.update({'car_passed': nltk.jaccard_distance(set(event), set(car_passed.__doc__.strip()))})
-        dict_fn_sim.update({'ai_stopped': nltk.jaccard_distance(set(event), set(ai_stopped.__doc__.strip()))})
-        dict_fn_sim.update({'ai_moving': nltk.jaccard_distance(set(event), set(ai_moving.__doc__.strip()))})
-        dict_fn_sim.update({'ai_following': nltk.jaccard_distance(set(event), set(ai_following.__doc__.strip()))})
     except AttributeError:
         print('Please add docstrings to one of the event-matching functions.')
         return ''
@@ -240,15 +239,17 @@ def fetch_test_case_content(test_case):
     i = 0
     lst_events_set = []
     while i < len(test_case):
-        matched_func = get_similar_func_content(test_case[i][1].split('_'))
+        matched_func = get_event_func_content(test_case[i][1].split('_'))
         # print('Which function? ', ' '.join(test_case[i][1].split('_')), ': ', matched_func)
         current_event = test_case[i][1]
         speed = current_event.split(' ')[2] if len(current_event.split(' ')) == 3 else 0
         param = current_event.split('_')[0]
         param = 'obj' if param == 'obstacle' else param # Just to make it fit the convention used
         ent_no =  lst_events_set.count(current_event) - 1 if lst_events_set.count(current_event) > 1  else 1
-        testing_content += eval(matched_func + "('" + param + "', '" + str(ent_no) + "', '" + str(speed) + "')")
-        lst_events_set.append(current_event)
+        if current_event not in lst_events_set:
+            # Parameters for the functions called below: (entity (object or car), entity index, speed, destination state)
+            testing_content += eval(matched_func + "('" + param + "', '" + str(ent_no) + "', '" + str(speed) + "', '" + test_case[i][2] + "')")
+            lst_events_set.append(current_event)
         i += 1
 
     return testing_content
