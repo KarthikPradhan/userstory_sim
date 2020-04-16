@@ -254,7 +254,7 @@ def fetch_test_case_content(test_case):
         matched_event_func = get_event_func_content(current_event.split('_'))
         matched_state_func = get_state_func_content(current_destination_state)
         # print('Which event function? ', ' '.join(current_event.split('_')), ': ', matched_event_func)
-        print('Which state function? ', ' '.join(current_destination_state.split('_')), ': ', matched_state_func)
+        # print('Which state function? ', ' '.join(current_destination_state.split('_')), ': ', matched_state_func)
         speed = current_event.split(' ')[2] if len(current_event.split(' ')) == 3 else 0
         param = current_event.split('_')[0]
         car_or_obj = 'obj' if param == 'obstacle' else param # Just to make it fit to the convention used
