@@ -249,6 +249,7 @@ def fetch_test_case_content(test_case):
     testing_content = """"""
     i = 0
     lst_events_set = enumerate_events([tup[1] for tup in test_case])
+    print(lst_events_set)
     while i < len(test_case):
         current_event, current_destination_state = test_case[i][1], test_case[i][2]
         matched_event_func = get_event_func_content(current_event.split('_'))
@@ -266,9 +267,10 @@ def fetch_test_case_content(test_case):
                 if ev_enum[1] > 1:
                     lst_events_set.remove(ev_enum)
                     lst_events_set.append((current_event, ev_enum[1] - 1))
+                    break
 
-        # if current_event not in lst_events_set:
-            # Parameters for the functions called below: (entity (object or car), entity index, speed, destination state)
+        print(current_event, lst_events_set)
+        # Parameters for the functions called below: (entity (object or car), entity index, speed, destination state)
         params = "('" + car_or_obj + "', '" + str(ent_no) + "', '" + str(speed) + "')"
         testing_content += eval(matched_event_func + params)
         testing_content += eval(matched_state_func + params)
