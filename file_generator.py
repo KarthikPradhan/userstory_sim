@@ -146,7 +146,7 @@ def detect_obstacle_car(*args):
     car_or_obj = "[2.91697, -12.596, 119.58]" if args[0] == 'obj' else "{}_{}.state['pos']".format(args[0], args[1])
     # Expects obstacle and iteration count as parameters
     return f"""
-    # Below code snippet is generated form 'detect_obstacle_car' function
+    # Below code snippet is generated form 'detect_obstacle_car' function for {args[0]}_{args[1]}
     scenario.update()
     dist_{args[0]}_{args[1]} = np.linalg.norm(np.array(vut.state['pos']) - np.array({car_or_obj}))
     
@@ -160,7 +160,7 @@ def car_passed(*args):
     # print(args)
     # Expects car as a parameter
     return f"""
-    # Below code snippet is generated form 'car_passed' function
+    # Below code snippet is generated form 'car_passed' function for {args[0]}_{args[1]}
     scenario.update()
     dist_{args[0]}_{args[1]}_prev = np.linalg.norm(np.array(vut.state['pos']) - np.array(np.array({args[0]}_{args[1]}.state['pos'])))
     sleep(0.1)
@@ -175,7 +175,7 @@ def ai_stopped(*args):
     """ Checks whether the self-driving car came to a halt. """
     # print(args)
     return f"""
-    # Below code snippet is generated form 'ai_stopped' function
+    # Below code snippet is generated form 'ai_stopped' function for {args[0]}_{args[1]}
     scenario.update()
     if sensors['electrics']['values']['wheelspeed'] == 0:
         print('AI Stopped')
@@ -187,7 +187,7 @@ def ai_moving(*args):
     # print(args)
     # Expects speed as the parameter, by default it is set to 0
     return f"""
-    # Below code snippet is generated form 'ai_moving' function
+    # Below code snippet is generated form 'ai_moving' function for {args[0]}_{args[1]}
     scenario.update()
     if sensors['electrics']['values']['wheelspeed'] > 0:
         print('AI is moving')
@@ -202,7 +202,7 @@ def ai_following(*args):
     # print(args)
     # Expects car as a parameter
     return f"""
-    # Below code snippet is generated form 'ai_following' function
+    # Below code snippet is generated form 'ai_following' function for {args[0]}_{args[1]}
     scenario.update()
     follow_{args[0]}_{args[1]} = np.linalg.norm(np.array(vut.state['dir']) - np.array(np.array({args[0]}_{args[1]}.state['dir']))
     
@@ -233,6 +233,14 @@ def get_event_func_content(event):
     return min(dict_fn_sim, key=lambda k: dict_fn_sim[k])
 
 
+def enumerate_events(events):
+    lst_enum_events = []
+    for ev in events:
+        lst_enum_events.append((ev, events.count(ev)))
+
+    return list(set(lst_enum_events))
+
+
 def fetch_test_case_content(test_case):
     """ Generates the script to check if the simulation runs as per the test case. """
     # t_intersection_w_obj = [('moving', 'obstacle_noticed', 'moving'), ('moving', 'car_noticed', 'stopped'),
@@ -240,7 +248,7 @@ def fetch_test_case_content(test_case):
     #                         ('stopped', 'car_passed', 'moving')]
     testing_content = """"""
     i = 0
-    lst_events_set = []
+    lst_events_set = enumerate_events([tup[1] for tup in test_case])
     while i < len(test_case):
         current_event, current_destination_state = test_case[i][1], test_case[i][2]
         matched_event_func = get_event_func_content(current_event.split('_'))
@@ -249,13 +257,21 @@ def fetch_test_case_content(test_case):
         # print('Which state function? ', ' '.join(current_destination_state.split('_')), ': ', matched_state_func)
         speed = current_event.split(' ')[2] if len(current_event.split(' ')) == 3 else 0
         param = current_event.split('_')[0]
-        param = 'obj' if param == 'obstacle' else param # Just to make it fit to the convention used
-        ent_no =  lst_events_set.count(current_event) - 1 if lst_events_set.count(current_event) > 1  else 1
-        if current_event not in lst_events_set:
+        car_or_obj = 'obj' if param == 'obstacle' else param # Just to make it fit to the convention used
+        # ent_no =  lst_events_set.count(current_event) - 1 if lst_events_set.count(current_event) >= 2  else 1
+        ent_no = 0
+        for ev_enum in lst_events_set:
+            if current_event == ev_enum[0]:
+                ent_no = ev_enum[1]
+                if ev_enum[1] > 1:
+                    lst_events_set.remove(ev_enum)
+                    lst_events_set.append((current_event, ev_enum[1] - 1))
+
+        # if current_event not in lst_events_set:
             # Parameters for the functions called below: (entity (object or car), entity index, speed, destination state)
-            testing_content += eval(matched_event_func + "('" + param + "', '" + str(ent_no) + "', '" + str(speed) + "')")
-            testing_content += eval(matched_state_func + "('" + param + "', '" + str(ent_no) + "', '" + str(speed) + "')")
-            lst_events_set.append(current_event)
+        params = "('" + car_or_obj + "', '" + str(ent_no) + "', '" + str(speed) + "')"
+        testing_content += eval(matched_event_func + params)
+        testing_content += eval(matched_state_func + params)
         i += 1
 
     return testing_content
