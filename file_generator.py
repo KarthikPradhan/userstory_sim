@@ -123,7 +123,8 @@ def environment_setup(test_case):
         else:
             no_of_objs += 1
 
-    no_of_cars /= 2  # Quick hack to avoid unnecessary multiplication of cars by 2
+    if no_of_cars > 1:
+        no_of_cars /= 2 # A quick hack to avoid unnecessary multiplication of cars by 2
     # print('CAR COUNT: ', no_of_cars, 'OBJ COUNT: ', no_of_objs)
 
     return {'file_content': create_objs(no_of_objs) + create_cars(no_of_cars), 'no_of_cars': no_of_cars}
@@ -134,6 +135,10 @@ def get_state_func_content(dest_state):
         dict_fn_sim.update({'ai_stopped': nltk.jaccard_distance(set(dest_state), set(ai_stopped.__doc__.strip()))})
         dict_fn_sim.update({'ai_moving': nltk.jaccard_distance(set(dest_state), set(ai_moving.__doc__.strip()))})
         dict_fn_sim.update({'ai_following': nltk.jaccard_distance(set(dest_state), set(ai_following.__doc__.strip()))})
+        dict_fn_sim.update({'ai_lane_changed': nltk.jaccard_distance(set(dest_state), set(ai_lane_changed.__doc__.strip()))})
+        # print(dict_fn_sim)
+        while list(dict_fn_sim.values()).count(min(dict_fn_sim.values())) > 1:
+            del dict_fn_sim[min(dict_fn_sim, key=lambda k: dict_fn_sim[k])] # A quick hack to avoid wrong selection of functions
     except AttributeError:
         print('Please add docstrings to one of the event-matching functions.')
         return ''
@@ -144,6 +149,7 @@ def detect_obstacle_car(*args):
     """ Checks whether the self-driving car is able to notice the given obstacle or car. """
     # print(args)
     car_or_obj = "[2.91697, -12.596, 119.58]" if args[0] == 'obj' else "{}_{}.state['pos']".format(args[0], args[1])
+    car_or_obj_str = 'Obstacle' if args[0] == 'obj' else 'Car'
     # Expects obstacle and iteration count as parameters
     return f"""
     # Below code snippet is generated form 'detect_obstacle_car' function for {args[0]}_{args[1]}
@@ -151,7 +157,7 @@ def detect_obstacle_car(*args):
     dist_{args[0]}_{args[1]} = np.linalg.norm(np.array(vut.state['pos']) - np.array({car_or_obj}))
     
     if dist_{args[0]}_{args[1]} < 8:
-        print('Obstacle Detection Successful')
+        print('{car_or_obj_str} Detection Successful')
     """
 
 
@@ -185,29 +191,48 @@ def ai_stopped(*args):
 def ai_moving(*args):
     """ Checks whether the self-driving car is moving """
     # print(args)
-    # Expects speed as the parameter, by default it is set to 0
-    return f"""
+    file_content = f"""
     # Below code snippet is generated form 'ai_moving' function for {args[0]}_{args[1]}
     scenario.update()
     if sensors['electrics']['values']['wheelspeed'] > 0:
         print('AI is moving')
-        
+    """
+    if args[2] != '0':
+        file_content += f""" 
     if sensors['electrics']['values']['wheelspeed'] == {args[2]}:
         print('AI is moving at {args[2]} kmph')
     """
+    # Expects speed as the parameter, by default it is set to 0
+    return file_content
 
 
 def ai_following(*args):
-    """ Checks whether the self-driving car is able to follow the given car. """
+    """ Checks whether the self-driving car is following the given car. """
     # print(args)
     # Expects car as a parameter
     return f"""
     # Below code snippet is generated form 'ai_following' function for {args[0]}_{args[1]}
     scenario.update()
-    follow_{args[0]}_{args[1]} = np.linalg.norm(np.array(vut.state['dir']) - np.array(np.array({args[0]}_{args[1]}.state['dir']))
+    follow_{args[0]}_{args[1]} = np.linalg.norm(np.array(vut.state['dir']) - np.array(np.array({args[0]}_{args[1]}.state['dir'])))
     
     if follow_{args[0]}_{args[1]} < 8:
         print('Car Following Successful')
+    """
+
+
+def ai_lane_changed(*args):
+    """ Checks whether the self-driving car changed the current lane. """
+    # print(args)
+    # Expects car as a parameter
+    return f"""
+    # Below code snippet is generated form 'ai_lane_changed' function
+    scenario.update()
+    ct__lane = np.array(vut.state['pos'])
+    sleep(0.6)
+    moved = np.linalg.norm(np.array(vut.state['pos']) - ct__lane)
+
+    if moved >= 3.7:
+        print('Lane Changing Successful')
     """
 
 
@@ -249,14 +274,14 @@ def fetch_test_case_content(test_case):
     testing_content = """"""
     i = 0
     lst_events_set = enumerate_events([tup[1] for tup in test_case])
-    print(lst_events_set)
+    # print(lst_events_set)
     while i < len(test_case):
         current_event, current_destination_state = test_case[i][1], test_case[i][2]
         matched_event_func = get_event_func_content(current_event.split('_'))
         matched_state_func = get_state_func_content(current_destination_state)
         # print('Which event function? ', ' '.join(current_event.split('_')), ': ', matched_event_func)
-        # print('Which state function? ', ' '.join(current_destination_state.split('_')), ': ', matched_state_func)
-        speed = current_event.split(' ')[2] if len(current_event.split(' ')) == 3 else 0
+        print('Which state function? ', ' '.join(current_destination_state.split('_')), ': ', matched_state_func)
+        speed = current_destination_state.split('_')[1] if any(map(str.isdigit, current_destination_state)) else 0
         param = current_event.split('_')[0]
         car_or_obj = 'obj' if param == 'obstacle' else param # Just to make it fit to the convention used
         # ent_no =  lst_events_set.count(current_event) - 1 if lst_events_set.count(current_event) >= 2  else 1
@@ -269,9 +294,10 @@ def fetch_test_case_content(test_case):
                     lst_events_set.append((current_event, ev_enum[1] - 1))
                     break
 
-        print(current_event, lst_events_set)
+        # print(current_event, current_destination_state, lst_events_set)
         # Parameters for the functions called below: (entity (object or car), entity index, speed, destination state)
         params = "('" + car_or_obj + "', '" + str(ent_no) + "', '" + str(speed) + "')"
+        print('Params', params)
         testing_content += eval(matched_event_func + params)
         testing_content += eval(matched_state_func + params)
         i += 1
@@ -280,7 +306,7 @@ def fetch_test_case_content(test_case):
 
 
 # Uncomment the below function calls to generate the file content
-create_file('t_intersection_w_obj', t_intersection_w_obj)
+# create_file('t_intersection_w_obj', t_intersection_w_obj)
 # create_file('t_intersection_wo_obj', t_intersection_wo_obj)
 # create_file('t_intersection_w_speed', t_intersection_w_speed)
 # create_file('straight_car_following', straight_car_following)
@@ -289,7 +315,7 @@ create_file('t_intersection_w_obj', t_intersection_w_obj)
 # create_file('cds_wo_obj', cds_wo_obj)
 # create_file('cul_de_sac_w_parked_car', cul_de_sac_w_parked_car)
 # create_file('t_intersection_car_following', t_intersection_car_following)
-# create_file('sudden_obstruction', sudden_obstruction)
+create_file('sudden_obstruction', sudden_obstruction)
 
 
 # print(detect_static_object.__doc__.strip())
