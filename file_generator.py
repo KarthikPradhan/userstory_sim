@@ -34,10 +34,10 @@ from beamngpy.sensors import Electrics
 import numpy as np
 from time import sleep, time
 
-beamng = BeamNGpy('localhost', 64256, home=r'C:\\Deepak\\beamng-research_unlimited\\trunk' )
+beamng = BeamNGpy('localhost', 64256, home=r'C:\\BeamNG_unlimited\\trunk')
 scenario = Scenario('west_coast_usa', '{scenario}')
 
-vut = Vehicle('vut', model='coupe', licence='VUT', colour='Green')
+vut = Vehicle('vut', model='coupe', licence='VUT', colour='Red')
 electrics = Electrics()
 vut.attach_sensor('electrics', electrics)
 scenario.add_vehicle(vut, pos=(-198.5, -164.189, 119.7), rot=(0, 0, -126.25))
@@ -88,7 +88,7 @@ def create_cars(n):
     cars = """"""
     while i <= n:
         cars += f"""
-car_{i} = Vehicle('caa', model='etk800', licence='CAR {i}')
+car_{i} = Vehicle('car_{i}', model='etk800', licence='CAR {i}', colour='Blue')
 scenario.add_vehicle(car_{i}, pos=(-140, -121.233, 119.586), rot=(0, 0, 55))
 """
         i += 1
@@ -157,7 +157,7 @@ def detect_obstacle_car(*args):
     dist_{args[0]}_{args[1]} = np.linalg.norm(np.array(vut.state['pos']) - np.array({car_or_obj}))
     
     if dist_{args[0]}_{args[1]} < 8:
-        print('{car_or_obj_str} Detection Successful')
+        print('{car_or_obj_str} Detected')
     """
 
 
@@ -173,7 +173,7 @@ def car_passed(*args):
     dist_{args[0]}_{args[1]}_next = np.linalg.norm(np.array(vut.state['pos']) - np.array(np.array({args[0]}_{args[1]}.state['pos'])))
 
     if dist_{args[0]}_{args[1]}_next > dist_{args[0]}_{args[1]}_prev:
-        print('Car Passing Successful')
+        print('Car Passed')
     """
 
 
@@ -181,10 +181,12 @@ def ai_stopped(*args):
     """ Checks whether the self-driving car is stopped. """
     # print(args)
     return f"""
-    # Below code snippet is generated form 'ai_stopped' function for {args[0]}_{args[1]}
-    scenario.update()
-    if sensors['electrics']['values']['wheelspeed'] == 0:
-        print('AI Stopped')
+        # Below code snippet is generated form 'ai_stopped' function for {args[0]}_{args[1]}
+        scenario.update()
+        if sensors['electrics']['values']['wheelspeed'] == 0:
+            print('[Successful] AI Stopped')
+        else:
+            print('[Failed] AI Moved')
     """
 
 
@@ -192,15 +194,19 @@ def ai_moving(*args):
     """ Checks whether the self-driving car is moving """
     # print(args)
     file_content = f"""
-    # Below code snippet is generated form 'ai_moving' function for {args[0]}_{args[1]}
-    scenario.update()
-    if sensors['electrics']['values']['wheelspeed'] > 0:
-        print('AI is moving')
+        # Below code snippet is generated form 'ai_moving' function for {args[0]}_{args[1]}
+        scenario.update()
+        if sensors['electrics']['values']['wheelspeed'] > 0:
+            print('[Successful] AI is moving')
+        else:
+            print('[Failed] AI stopped')
     """
     if args[2] != '0':
         file_content += f""" 
-    if sensors['electrics']['values']['wheelspeed'] == {args[2]}:
-        print('AI is moving at {args[2]} kmph')
+        if sensors['electrics']['values']['wheelspeed'] == {args[2]}:
+            print('[Successful] AI is moving at {args[2]} kmph')
+        else:
+            print('[Failed] AI did not move at {args[2]} kmph')
     """
     # Expects speed as the parameter, by default it is set to 0
     return file_content
@@ -211,12 +217,14 @@ def ai_following(*args):
     # print(args)
     # Expects car as a parameter
     return f"""
-    # Below code snippet is generated form 'ai_following' function for {args[0]}_{args[1]}
-    scenario.update()
-    follow_{args[0]}_{args[1]} = np.linalg.norm(np.array(vut.state['dir']) - np.array(np.array({args[0]}_{args[1]}.state['dir'])))
-    
-    if follow_{args[0]}_{args[1]} < 8:
-        print('Car Following Successful')
+        # Below code snippet is generated form 'ai_following' function for {args[0]}_{args[1]}
+        scenario.update()
+        follow_{args[0]}_{args[1]} = np.linalg.norm(np.array(vut.state['dir']) - np.array(np.array({args[0]}_{args[1]}.state['dir'])))
+        
+        if follow_{args[0]}_{args[1]} < 8:
+            print('[Successful] Car Following Successful')
+        else:
+            print('[Failed] Car Following Failed')
     """
 
 
@@ -225,14 +233,16 @@ def ai_lane_changed(*args):
     # print(args)
     # Expects car as a parameter
     return f"""
-    # Below code snippet is generated form 'ai_lane_changed' function
-    scenario.update()
-    ct__lane = np.array(vut.state['pos'])
-    sleep(0.6)
-    moved = np.linalg.norm(np.array(vut.state['pos']) - ct__lane)
-
-    if moved >= 3.7:
-        print('Lane Changing Successful')
+        # Below code snippet is generated form 'ai_lane_changed' function
+        scenario.update()
+        ct__lane = np.array(vut.state['pos'])
+        sleep(0.6)
+        moved = np.linalg.norm(np.array(vut.state['pos']) - ct__lane)
+    
+        if moved >= 3.7:
+            print('[Successful] Lane Changing Successful')
+        else:
+            print('[Failed] Lane Changing Failed')
     """
 
 

@@ -3,10 +3,10 @@ from beamngpy.sensors import Electrics
 import numpy as np
 from time import sleep, time
 
-beamng = BeamNGpy('localhost', 64256, home=r'C:\Deepak\beamng-research_unlimited\trunk' )
+beamng = BeamNGpy('localhost', 64256, home=r'C:\BeamNG_unlimited\trunk')
 scenario = Scenario('west_coast_usa', 'fourway_intersection_w_obj')
 
-vut = Vehicle('vut', model='coupe', licence='VUT', colour='Green')
+vut = Vehicle('vut', model='coupe', licence='VUT', colour='Red')
 electrics = Electrics()
 vut.attach_sensor('electrics', electrics)
 scenario.add_vehicle(vut, pos=(-198.5, -164.189, 119.7), rot=(0, 0, -126.25))
@@ -33,14 +33,16 @@ for _ in range(240):
     dist_obj_1 = np.linalg.norm(np.array(vut.state['pos']) - np.array([2.91697, -12.596, 119.58]))
     
     if dist_obj_1 < 8:
-        print('Obstacle Detection Successful')
+        print('Obstacle Detected')
     
-    # Below code snippet is generated form 'ai_lane_changed' function
-    scenario.update()
-    ct__lane = np.array(vut.state['pos'])
-    sleep(0.6)
-    moved = np.linalg.norm(np.array(vut.state['pos']) - ct__lane)
-
-    if moved >= 3.7:
-        print('Lane Changing Successful')
+        # Below code snippet is generated form 'ai_lane_changed' function
+        scenario.update()
+        ct__lane = np.array(vut.state['pos'])
+        sleep(0.6)
+        moved = np.linalg.norm(np.array(vut.state['pos']) - ct__lane)
+    
+        if moved >= 3.7:
+            print('[Successful] Lane Changing Successful')
+        else:
+            print('[Failed] Lane Changing Failed')
     

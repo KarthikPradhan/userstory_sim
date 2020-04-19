@@ -3,15 +3,15 @@ from beamngpy.sensors import Electrics
 import numpy as np
 from time import sleep, time
 
-beamng = BeamNGpy('localhost', 64256, home=r'C:\Deepak\beamng-research_unlimited\trunk' )
+beamng = BeamNGpy('localhost', 64256, home=r'C:\BeamNG_unlimited\trunk')
 scenario = Scenario('west_coast_usa', 'sudden_obstruction')
 
-vut = Vehicle('vut', model='coupe', licence='VUT', colour='Green')
+vut = Vehicle('vut', model='coupe', licence='VUT', colour='Red')
 electrics = Electrics()
 vut.attach_sensor('electrics', electrics)
 scenario.add_vehicle(vut, pos=(-198.5, -164.189, 119.7), rot=(0, 0, -126.25))
 
-car_1 = Vehicle('caa', model='etk800', licence='CAR 1')
+car_1 = Vehicle('car_1', model='etk800', licence='CAR 1', colour='Blue')
 scenario.add_vehicle(car_1, pos=(-140, -121.233, 119.586), rot=(0, 0, 55))
 
 scenario.make(beamng)
@@ -34,10 +34,12 @@ for _ in range(240):
     dist_car_1 = np.linalg.norm(np.array(vut.state['pos']) - np.array(car_1.state['pos']))
     
     if dist_car_1 < 8:
-        print('Car Detection Successful')
+        print('Car Detected')
     
-    # Below code snippet is generated form 'ai_stopped' function for car_1
-    scenario.update()
-    if sensors['electrics']['values']['wheelspeed'] == 0:
-        print('AI Stopped')
+        # Below code snippet is generated form 'ai_stopped' function for car_1
+        scenario.update()
+        if sensors['electrics']['values']['wheelspeed'] == 0:
+            print('[Successful] AI Stopped')
+        else:
+            print('[Failed] AI Moved')
     
