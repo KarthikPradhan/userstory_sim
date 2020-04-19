@@ -1,5 +1,5 @@
 from beamngpy import BeamNGpy, Scenario, Vehicle, StaticObject
-from beamngpy.sensors import Electrics
+from beamngpy.sensors import Electrics, Damage
 import numpy as np
 from time import sleep, time
 
@@ -8,7 +8,9 @@ scenario = Scenario('west_coast_usa', 'cul_de_sac_w_parked_car')
 
 vut = Vehicle('vut', model='coupe', licence='VUT', colour='Red')
 electrics = Electrics()
+damage = Damage()
 vut.attach_sensor('electrics', electrics)
+vut.attach_sensor('damage', damage)
 scenario.add_vehicle(vut, pos=(-198.5, -164.189, 119.7), rot=(0, 0, -126.25))
 
 car_1 = Vehicle('car_1', model='etk800', licence='CAR 1', colour='Blue')
@@ -28,6 +30,7 @@ for _ in range(240):
     sleep(0.1)
     vut.update_vehicle()
     sensors = bng.poll_sensors(vut)
+    dmg = sensors['damage']
     
     # Below code snippet is generated form 'detect_obstacle_car' function for car_1
     scenario.update()
@@ -42,8 +45,8 @@ for _ in range(240):
         sleep(0.6)
         moved = np.linalg.norm(np.array(vut.state['pos']) - ct__lane)
     
-        if moved >= 3.7:
+        if moved >= 3.7 or dmg['damage'] == 0:
             print('[Successful] Lane Changing Successful')
         else:
-            print('[Failed] Lane Changing Failed')
+            print('[Failed] Lane Changing Failed or the VUT is damaged')
     

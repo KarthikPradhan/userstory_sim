@@ -1,5 +1,5 @@
 from beamngpy import BeamNGpy, Scenario, Vehicle, StaticObject
-from beamngpy.sensors import Electrics
+from beamngpy.sensors import Electrics, Damage
 import numpy as np
 from time import sleep, time
 
@@ -8,7 +8,9 @@ scenario = Scenario('west_coast_usa', 't_intersection_car_following')
 
 vut = Vehicle('vut', model='coupe', licence='VUT', colour='Red')
 electrics = Electrics()
+damage = Damage()
 vut.attach_sensor('electrics', electrics)
+vut.attach_sensor('damage', damage)
 scenario.add_vehicle(vut, pos=(-198.5, -164.189, 119.7), rot=(0, 0, -126.25))
 
 car_1 = Vehicle('car_1', model='etk800', licence='CAR 1', colour='Blue')
@@ -28,6 +30,7 @@ for _ in range(240):
     sleep(0.1)
     vut.update_vehicle()
     sensors = bng.poll_sensors(vut)
+    dmg = sensors['damage']
     
     # Below code snippet is generated form 'detect_obstacle_car' function for car_1
     scenario.update()
@@ -40,10 +43,10 @@ for _ in range(240):
         scenario.update()
         follow_car_1 = np.linalg.norm(np.array(vut.state['dir']) - np.array(np.array(car_1.state['dir'])))
         
-        if follow_car_1 < 8:
+        if follow_car_1 < 8 or dmg['damage'] == 0:
             print('[Successful] Car Following Successful')
         else:
-            print('[Failed] Car Following Failed')
+            print('[Failed] Car Following Failed or the VUT is damaged')
     
     # Below code snippet is generated form 'car_passed' function for car_1
     scenario.update()
@@ -56,8 +59,8 @@ for _ in range(240):
     
         # Below code snippet is generated form 'ai_stopped' function for car_1
         scenario.update()
-        if sensors['electrics']['values']['wheelspeed'] == 0:
-            print('[Successful] AI Stopped')
+        if sensors['electrics']['values']['wheelspeed'] == 0 or dmg['damage'] == 0:
+            print('[Successful] VUT Stopped')
         else:
-            print('[Failed] AI Moved')
+            print('[Failed] VUT Moved or Damaged')
     

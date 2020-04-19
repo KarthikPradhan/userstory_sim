@@ -30,7 +30,7 @@ sudden_obstruction = [('moving', 'car_noticed', 'stopped')]
 def create_file(scenario, test_case):
     f = open("scenarios/" + scenario + ".py", "w")
     file_contents = f"""from beamngpy import BeamNGpy, Scenario, Vehicle, StaticObject
-from beamngpy.sensors import Electrics
+from beamngpy.sensors import Electrics, Damage
 import numpy as np
 from time import sleep, time
 
@@ -39,7 +39,9 @@ scenario = Scenario('west_coast_usa', '{scenario}')
 
 vut = Vehicle('vut', model='coupe', licence='VUT', colour='Red')
 electrics = Electrics()
+damage = Damage()
 vut.attach_sensor('electrics', electrics)
+vut.attach_sensor('damage', damage)
 scenario.add_vehicle(vut, pos=(-198.5, -164.189, 119.7), rot=(0, 0, -126.25))
 """
     dict_env = environment_setup(test_case)
@@ -63,6 +65,7 @@ for _ in range(240):
     sleep(0.1)
     vut.update_vehicle()
     sensors = bng.poll_sensors(vut)
+    dmg = sensors['damage']
     """
 
     file_contents += fetch_test_case_content(test_case)
@@ -183,10 +186,10 @@ def ai_stopped(*args):
     return f"""
         # Below code snippet is generated form 'ai_stopped' function for {args[0]}_{args[1]}
         scenario.update()
-        if sensors['electrics']['values']['wheelspeed'] == 0:
-            print('[Successful] AI Stopped')
+        if sensors['electrics']['values']['wheelspeed'] == 0 or dmg['damage'] == 0:
+            print('[Successful] VUT Stopped')
         else:
-            print('[Failed] AI Moved')
+            print('[Failed] VUT Moved or Damaged')
     """
 
 
@@ -196,17 +199,17 @@ def ai_moving(*args):
     file_content = f"""
         # Below code snippet is generated form 'ai_moving' function for {args[0]}_{args[1]}
         scenario.update()
-        if sensors['electrics']['values']['wheelspeed'] > 0:
-            print('[Successful] AI is moving')
+        if sensors['electrics']['values']['wheelspeed'] > 0 or dmg['damage'] == 0:
+            print('[Successful] VUT is moving')
         else:
-            print('[Failed] AI stopped')
+            print('[Failed] VUT Stopped or Damaged')
     """
     if args[2] != '0':
         file_content += f""" 
-        if sensors['electrics']['values']['wheelspeed'] == {args[2]}:
-            print('[Successful] AI is moving at {args[2]} kmph')
+        if sensors['electrics']['values']['wheelspeed'] == {args[2]} or dmg['damage'] == 0:
+            print('[Successful] VUT is moving at {args[2]} kmph')
         else:
-            print('[Failed] AI did not move at {args[2]} kmph')
+            print('[Failed] VUT did not move at {args[2]} kmph or it is damaged')
     """
     # Expects speed as the parameter, by default it is set to 0
     return file_content
@@ -221,10 +224,10 @@ def ai_following(*args):
         scenario.update()
         follow_{args[0]}_{args[1]} = np.linalg.norm(np.array(vut.state['dir']) - np.array(np.array({args[0]}_{args[1]}.state['dir'])))
         
-        if follow_{args[0]}_{args[1]} < 8:
+        if follow_{args[0]}_{args[1]} < 8 or dmg['damage'] == 0:
             print('[Successful] Car Following Successful')
         else:
-            print('[Failed] Car Following Failed')
+            print('[Failed] Car Following Failed or the VUT is damaged')
     """
 
 
@@ -239,10 +242,10 @@ def ai_lane_changed(*args):
         sleep(0.6)
         moved = np.linalg.norm(np.array(vut.state['pos']) - ct__lane)
     
-        if moved >= 3.7:
+        if moved >= 3.7 or dmg['damage'] == 0:
             print('[Successful] Lane Changing Successful')
         else:
-            print('[Failed] Lane Changing Failed')
+            print('[Failed] Lane Changing Failed or the VUT is damaged')
     """
 
 
@@ -316,7 +319,7 @@ def fetch_test_case_content(test_case):
 
 
 # Uncomment the below function calls to generate the file content
-# create_file('t_intersection_w_obj', t_intersection_w_obj)
+create_file('t_intersection_w_obj', t_intersection_w_obj)
 # create_file('t_intersection_wo_obj', t_intersection_wo_obj)
 # create_file('t_intersection_w_speed', t_intersection_w_speed)
 # create_file('straight_car_following', straight_car_following)
@@ -325,11 +328,4 @@ def fetch_test_case_content(test_case):
 # create_file('cds_wo_obj', cds_wo_obj)
 # create_file('cul_de_sac_w_parked_car', cul_de_sac_w_parked_car)
 # create_file('t_intersection_car_following', t_intersection_car_following)
-create_file('sudden_obstruction', sudden_obstruction)
-
-
-# print(detect_static_object.__doc__.strip())
-# print(detect_car.__doc__.strip())
-# print(ai_stopped.__doc__.strip())
-# print(ai_moving.__doc__.strip())
-# print(ai_following.__doc__.strip())
+# create_file('sudden_obstruction', sudden_obstruction)
