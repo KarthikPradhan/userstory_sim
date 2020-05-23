@@ -48,7 +48,7 @@ for _ in range(240):
     
         # Below code snippet is generated form 'ai_moving' function for obj_1
         scenario.update()
-        if sensors['electrics']['values']['wheelspeed'] > 0 or dmg['damage'] == 0:
+        if sensors['electrics']['values']['wheelspeed'] > 0 and dmg['damage'] == 0:
             print('[Successful] VUT is moving')
         else:
             print('[Failed] VUT Stopped or Damaged')
@@ -62,7 +62,7 @@ for _ in range(240):
     
         # Below code snippet is generated form 'ai_stopped' function for car_2
         scenario.update()
-        if sensors['electrics']['values']['wheelspeed'] == 0 or dmg['damage'] == 0:
+        if sensors['electrics']['values']['wheelspeed'] == 0 and dmg['damage'] == 0:
             print('[Successful] VUT Stopped')
         else:
             print('[Failed] VUT Moved or Damaged')
@@ -78,7 +78,7 @@ for _ in range(240):
     
         # Below code snippet is generated form 'ai_moving' function for car_2
         scenario.update()
-        if sensors['electrics']['values']['wheelspeed'] > 0 or dmg['damage'] == 0:
+        if sensors['electrics']['values']['wheelspeed'] > 0 and dmg['damage'] == 0:
             print('[Successful] VUT is moving')
         else:
             print('[Failed] VUT Stopped or Damaged')
@@ -92,7 +92,7 @@ for _ in range(240):
     
         # Below code snippet is generated form 'ai_stopped' function for car_1
         scenario.update()
-        if sensors['electrics']['values']['wheelspeed'] == 0 or dmg['damage'] == 0:
+        if sensors['electrics']['values']['wheelspeed'] == 0 and dmg['damage'] == 0:
             print('[Successful] VUT Stopped')
         else:
             print('[Failed] VUT Moved or Damaged')
@@ -108,7 +108,7 @@ for _ in range(240):
     
         # Below code snippet is generated form 'ai_moving' function for car_1
         scenario.update()
-        if sensors['electrics']['values']['wheelspeed'] > 0 or dmg['damage'] == 0:
+        if sensors['electrics']['values']['wheelspeed'] > 0 and dmg['damage'] == 0:
             print('[Successful] VUT is moving')
         else:
             print('[Failed] VUT Stopped or Damaged')

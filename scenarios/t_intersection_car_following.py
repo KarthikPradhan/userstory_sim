@@ -47,15 +47,15 @@ for _ in range(240):
             print('[Successful] Car Following Successful')
         else:
             print('[Failed] Car Following Failed or the VUT is damaged')
-    
-    # Below code snippet is generated form 'car_passed' function for car_1
+
+    # Below code snippet is generated form 'car_stopped' function for car_1
     scenario.update()
     dist_car_1_prev = np.linalg.norm(np.array(vut.state['pos']) - np.array(np.array(car_1.state['pos'])))
     sleep(0.1)
     dist_car_1_next = np.linalg.norm(np.array(vut.state['pos']) - np.array(np.array(car_1.state['pos'])))
 
-    if dist_car_1_next > dist_car_1_prev:
-        print('Car Passed')
+    if dist_car_1_next == dist_car_1_prev:
+        print('Car Stopped')
     
         # Below code snippet is generated form 'ai_stopped' function for car_1
         scenario.update()

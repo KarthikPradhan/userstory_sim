@@ -179,6 +179,21 @@ def car_passed(*args):
         print('Car Passed')
     """
 
+def car_stopped(*args):
+    """ Checks whether the given car stopped. """
+    # print(args)
+    # Expects car as a parameter
+    return f"""
+    # Below code snippet is generated form 'car_stopped' function for {args[0]}_{args[1]}
+    scenario.update()
+    dist_{args[0]}_{args[1]}_prev = np.linalg.norm(np.array(vut.state['pos']) - np.array(np.array({args[0]}_{args[1]}.state['pos'])))
+    sleep(0.1)
+    dist_{args[0]}_{args[1]}_next = np.linalg.norm(np.array(vut.state['pos']) - np.array(np.array({args[0]}_{args[1]}.state['pos'])))
+
+    if dist_{args[0]}_{args[1]}_next == dist_{args[0]}_{args[1]}_prev:
+        print('Car Stopped')
+    """
+
 
 def ai_stopped(*args):
     """ Checks whether the self-driving car is stopped. """
@@ -186,7 +201,7 @@ def ai_stopped(*args):
     return f"""
         # Below code snippet is generated form 'ai_stopped' function for {args[0]}_{args[1]}
         scenario.update()
-        if sensors['electrics']['values']['wheelspeed'] == 0 or dmg['damage'] == 0:
+        if sensors['electrics']['values']['wheelspeed'] == 0 and dmg['damage'] == 0:
             print('[Successful] VUT Stopped')
         else:
             print('[Failed] VUT Moved or Damaged')
@@ -199,14 +214,14 @@ def ai_moving(*args):
     file_content = f"""
         # Below code snippet is generated form 'ai_moving' function for {args[0]}_{args[1]}
         scenario.update()
-        if sensors['electrics']['values']['wheelspeed'] > 0 or dmg['damage'] == 0:
+        if sensors['electrics']['values']['wheelspeed'] > 0 and dmg['damage'] == 0:
             print('[Successful] VUT is moving')
         else:
             print('[Failed] VUT Stopped or Damaged')
     """
     if args[2] != '0':
         file_content += f""" 
-        if sensors['electrics']['values']['wheelspeed'] == {args[2]} or dmg['damage'] == 0:
+        if sensors['electrics']['values']['wheelspeed'] == {args[2]} and dmg['damage'] == 0:
             print('[Successful] VUT is moving at {args[2]} kmph')
         else:
             print('[Failed] VUT did not move at {args[2]} kmph or it is damaged')
@@ -224,7 +239,7 @@ def ai_following(*args):
         scenario.update()
         follow_{args[0]}_{args[1]} = np.linalg.norm(np.array(vut.state['dir']) - np.array(np.array({args[0]}_{args[1]}.state['dir'])))
         
-        if follow_{args[0]}_{args[1]} < 8 or dmg['damage'] == 0:
+        if follow_{args[0]}_{args[1]} < 8 and dmg['damage'] == 0:
             print('[Successful] Car Following Successful')
         else:
             print('[Failed] Car Following Failed or the VUT is damaged')
@@ -242,7 +257,7 @@ def ai_lane_changed(*args):
         sleep(0.6)
         moved = np.linalg.norm(np.array(vut.state['pos']) - ct__lane)
     
-        if moved >= 3.7 or dmg['damage'] == 0:
+        if moved >= 3.7 and dmg['damage'] == 0:
             print('[Successful] Lane Changing Successful')
         else:
             print('[Failed] Lane Changing Failed or the VUT is damaged')
@@ -264,6 +279,7 @@ def get_event_func_content(event):
     try:
         dict_fn_sim.update({'detect_obstacle_car': nltk.jaccard_distance(set(event), set(detect_obstacle_car.__doc__.strip()))})
         dict_fn_sim.update({'car_passed': nltk.jaccard_distance(set(event), set(car_passed.__doc__.strip()))})
+        dict_fn_sim.update({'car_stopped': nltk.jaccard_distance(set(event), set(car_stopped.__doc__.strip()))})
     except AttributeError:
         print('Please add docstrings to one of the event-matching functions.')
         return ''
@@ -281,9 +297,6 @@ def enumerate_events(events):
 
 def fetch_test_case_content(test_case):
     """ Generates the script to check if the simulation runs as per the test case. """
-    # t_intersection_w_obj = [('moving', 'obstacle_noticed', 'moving'), ('moving', 'car_noticed', 'stopped'),
-    #                         ('stopped', 'car_passed', 'moving'), ('moving', 'car_noticed', 'stopped'),
-    #                         ('stopped', 'car_passed', 'moving')]
     testing_content = """"""
     i = 0
     lst_events_set = enumerate_events([tup[1] for tup in test_case])

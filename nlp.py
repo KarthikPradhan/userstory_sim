@@ -32,10 +32,12 @@ import spacy
 #     for token2 in tokens:
 #         print(token1.text, token2.text, token1.similarity(token2))
 
-w1 = set('The car detected the obstacle')
-w2 = set('obstacle noticed')
-w3 = set('car noticed')
+# w1 = set('The car detected the obstacle')
+# w2 = set('obstacle noticed')
+# w3 = set('car noticed')
+#
+# print('JACCARD DISTANCE obj ', nltk.jaccard_distance(w1, w2))
+# print('JACCARD DISTANCE car ', nltk.jaccard_distance(w1, w3))
 
-print('JACCARD DISTANCE obj ', nltk.jaccard_distance(w1, w2))
-print('JACCARD DISTANCE car ', nltk.jaccard_distance(w1, w3))
 
+print(spacy.explain('nsubj'))
