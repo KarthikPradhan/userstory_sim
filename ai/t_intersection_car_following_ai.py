@@ -57,7 +57,7 @@ for _ in range(240):
     if dist_car_1_next == dist_car_1_prev:
         print('Car Stopped')
         # Below code is written to make the self-driving car to come to a halt
-        vut.ai_set_mode('disabled')
+        vut.ai_set_mode('stopping')
         # Below code snippet is generated form 'ai_stopped' function for car_1
         scenario.update()
         if sensors['electrics']['values']['wheelspeed'] == 0 or dmg['damage'] == 0:
